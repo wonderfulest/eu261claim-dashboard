@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="innerVisible" :title="isEdit ? '编辑分群' : '新增分群'" width="860" @closed="onClosed">
+  <el-dialog v-model="innerVisible" width="1200px" :title="isEdit ? '编辑分群' : '新增分群'" @closed="onClosed">
     <el-form :model="form" label-width="100px">
       <el-form-item label="名称" required>
         <el-input v-model="form.name" maxlength="50" show-word-limit />
@@ -13,19 +13,52 @@
       <el-form-item label="条件列表">
         <div class="conditions-wrap">
           <div class="condition-row" v-for="(c, idx) in ruleBuilder.conditions" :key="idx">
-            <el-select v-model="c.field" placeholder="字段" style="width: 280px">
+            <el-select v-model="c.field" placeholder="字段" style="width: 360px">
               <el-option v-for="f in fieldOptions" :key="f.value" :label="f.label" :value="f.value" />
             </el-select>
             <el-select v-model="c.op" placeholder="操作符" style="width: 140px">
               <el-option v-for="op in opOptions" :key="op.value" :label="op.label" :value="op.value" />
             </el-select>
             <template v-if="c.op === 'between'">
-              <el-input v-model="c.value" placeholder="最小值" style="width: 160px" />
-              <span style="margin: 0 6px;">~</span>
-              <el-input v-model="c.value2" placeholder="最大值" style="width: 160px" />
+              <template v-if="isEnumField(c.field)">
+                <el-select v-model="c.value" placeholder="最小值" style="width: 120px">
+                  <el-option
+                    v-for="opt in getEnumOptions(c.field)"
+                    :key="opt.value"
+                    :label="opt.name || opt.value"
+                    :value="opt.value"
+                  />
+                </el-select>
+                <span style="margin: 0 6px;">~</span>
+                <el-select v-model="c.value2" placeholder="最大值" style="width: 120px">
+                  <el-option
+                    v-for="opt in getEnumOptions(c.field)"
+                    :key="opt.value"
+                    :label="opt.name || opt.value"
+                    :value="opt.value"
+                  />
+                </el-select>
+              </template>
+              <template v-else>
+                <el-input v-model="c.value" placeholder="最小值" style="width: 100px" />
+                <span style="margin: 0 6px;">~</span>
+                <el-input v-model="c.value2" placeholder="最大值" style="width: 100px" />
+              </template>
             </template>
             <template v-else>
-              <el-input v-model="c.value" placeholder="值" style="width: 340px" />
+              <template v-if="isEnumField(c.field)">
+                <el-select v-model="c.value" placeholder="值" style="width: 160px">
+                  <el-option
+                    v-for="opt in getEnumOptions(c.field)"
+                    :key="opt.value"
+                    :label="opt.name || opt.value"
+                    :value="opt.value"
+                  />
+                </el-select>
+              </template>
+              <template v-else>
+                <el-input v-model="c.value" placeholder="值" style="width: 160px" />
+              </template>
             </template>
             <el-button type="danger" plain @click="removeCondition(idx)">删除</el-button>
           </div>
@@ -57,7 +90,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import type { SegmentCreateDTO, SegmentUpdateDTO, SegmentVO } from '@/api/segment'
-import { getUserProfileColumns, type TableColumn } from '@/api/metadata'
+import { getCustomerProfileColumns, type TableColumn } from '@/api/metadata'
 
 const props = defineProps<{ visible: boolean; isEdit: boolean; initial: Partial<SegmentVO> | null }>()
 const emit = defineEmits<{ (e: 'update:visible', v: boolean): void; (e: 'submit', payload: { isEdit: boolean; id?: number; create?: SegmentCreateDTO; update?: SegmentUpdateDTO }): void }>()
@@ -89,13 +122,31 @@ const form = ref<SegmentForm>({
 })
 
 // Field options from metadata
+const allColumns = ref<TableColumn[]>([])
 const fieldOptions = ref<Array<{ label: string; value: string }>>([])
 const loadUserProfileFields = async () => {
   try {
-    const res = await getUserProfileColumns()
+    const res = await getCustomerProfileColumns()
     const cols = (res.data || []) as TableColumn[]
+    allColumns.value = cols
     fieldOptions.value = cols.map(c => ({ label: `${c.comment || c.field} ${c.field}`.trim(), value: c.field }))
   } catch {}
+}
+
+const findColumnByField = (field: string): TableColumn | undefined => {
+  if (!field) return undefined
+  return allColumns.value.find(c => c.field === field)
+}
+
+const isEnumField = (field: string): boolean => {
+  const col = findColumnByField(field)
+  return !!col && col.type === 'enum' && Array.isArray(col.enumOptions) && col.enumOptions.length > 0
+}
+
+const getEnumOptions = (field: string) => {
+  const col = findColumnByField(field)
+  if (!col || !Array.isArray(col.enumOptions)) return []
+  return col.enumOptions
 }
 
 // Rule builder

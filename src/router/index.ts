@@ -31,6 +31,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/marketing/customer-profiles',
+      name: 'CustomerProfiles',
+      component: () => import('@/views/marketing/CustomerProfiles.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/email-records',
       name: 'EmailRecords',
       component: () => import('@/views/dashboard/EmailRecords.vue'),
@@ -58,6 +64,12 @@ const router = createRouter({
       path: '/users/role-management',
       name: 'RoleManagement',
       component: () => import('@/views/RoleManagement.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/marketing/segments',
+      name: 'Segments',
+      component: () => import('@/views/marketing/Segments.vue'),
       meta: { requiresAuth: true }
     },
     {
