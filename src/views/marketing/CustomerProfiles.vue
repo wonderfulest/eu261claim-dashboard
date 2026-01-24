@@ -2,7 +2,9 @@
   <div class="customer-profiles-page">
     <div class="page-header">
       <h2>客户画像</h2>
-      <div style="flex:1"></div>
+      <div style="flex:1; display:flex; justify-content:flex-end; gap:8px;">
+        <el-button @click="handleRefreshAll" :loading="refreshing">刷新画像</el-button>
+      </div>
     </div>
 
     <div class="filters">
@@ -189,7 +191,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { pageCustomerProfiles, updateCustomerProfile, deleteCustomerProfile, type CustomerProfileVO, type CustomerProfileUpdateDTO } from '@/api/customerProfile'
+import { pageCustomerProfiles, updateCustomerProfile, deleteCustomerProfile, refreshAllCustomerProfiles, type CustomerProfileVO, type CustomerProfileUpdateDTO } from '@/api/customerProfile'
 import { getCustomerProfileColumns, type TableColumn } from '@/api/metadata'
 
 const loading = ref(false)
@@ -340,6 +342,23 @@ const doDelete = async (row: CustomerProfileVO) => {
     }
   } catch (e) {
     ElMessage.error('删除失败')
+  }
+}
+
+const refreshing = ref(false)
+const handleRefreshAll = async () => {
+  refreshing.value = true
+  try {
+    const res = await refreshAllCustomerProfiles()
+    if (res.code === 0) {
+      ElMessage.success('已触发全量画像刷新')
+    } else {
+      ElMessage.error(res.msg || '触发画像刷新失败')
+    }
+  } catch (e) {
+    ElMessage.error('触发画像刷新失败')
+  } finally {
+    refreshing.value = false
   }
 }
 

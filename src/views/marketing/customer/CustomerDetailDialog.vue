@@ -20,6 +20,37 @@
           @view="openContactDetail"
         />
       </div>
+
+      <div style="margin-top: 24px;">
+        <el-card>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="font-weight:600;">客户画像</div>
+            <div style="display:flex; gap:8px;">
+              <el-button size="small" @click="handleRefreshProfile" :loading="profileRefreshing">刷新画像</el-button>
+              <el-button size="small" type="primary" @click="openProfileEdit">编辑画像</el-button>
+            </div>
+          </div>
+          <div v-if="profileLoading" style="text-align:center; padding:12px;">加载中...</div>
+          <div v-else-if="profile">
+            <el-descriptions :column="2" border>
+              <el-descriptions-item label="客户价值等级">{{ renderProfileEnumLabel('customer_value_level', profile.customerValueLevel) || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="合作意向">{{ renderProfileEnumLabel('cooperation_intent', profile.cooperationIntent) || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="决策速度">{{ renderProfileEnumLabel('decision_speed', profile.decisionSpeed) || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="价格敏感度">{{ renderProfileEnumLabel('price_sensitivity', profile.priceSensitivity) || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="获客成本等级">{{ renderProfileEnumLabel('acquisition_cost_level', profile.acquisitionCostLevel) || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="流量质量">{{ renderProfileEnumLabel('traffic_quality', profile.trafficQuality) || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="线索质量评分">{{ profile.leadQualityScore ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="推荐联系渠道">{{ renderProfileEnumLabel('recommended_contact_method', profile.recommendedContactMethod) || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="推荐沟通语言">{{ profile.recommendedLanguage || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="跟进优先级">{{ profile.followUpPriority || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="跟进周期">{{ profile.followUpCycle || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="画像总结" :span="2">{{ profile.profileSummary || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="风险备注" :span="2">{{ profile.riskNotes || '-' }}</el-descriptions-item>
+            </el-descriptions>
+          </div>
+          <div v-else style="color:#999;">暂无画像数据</div>
+        </el-card>
+      </div>
     </div>
 
     <el-dialog
@@ -98,6 +129,108 @@
         <el-button type="primary" :disabled="!contactDetail" @click="editContactFromDetail">编辑</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+      v-model="profileEditVisible"
+      title="编辑客户画像"
+      width="800"
+      append-to-body
+    >
+      <el-form :model="profileEditForm" label-width="150px">
+        <el-form-item label="客户价值等级">
+          <el-select v-model="profileEditForm.customerValueLevel" clearable placeholder="请选择">
+            <el-option
+              v-for="opt in getProfileEnumOptions('customer_value_level')"
+              :key="opt.value"
+              :label="opt.name || opt.value"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="合作意向">
+          <el-select v-model="profileEditForm.cooperationIntent" clearable placeholder="请选择">
+            <el-option
+              v-for="opt in getProfileEnumOptions('cooperation_intent')"
+              :key="opt.value"
+              :label="opt.name || opt.value"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="决策速度">
+          <el-select v-model="profileEditForm.decisionSpeed" clearable placeholder="请选择">
+            <el-option
+              v-for="opt in getProfileEnumOptions('decision_speed')"
+              :key="opt.value"
+              :label="opt.name || opt.value"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="价格敏感度">
+          <el-select v-model="profileEditForm.priceSensitivity" clearable placeholder="请选择">
+            <el-option
+              v-for="opt in getProfileEnumOptions('price_sensitivity')"
+              :key="opt.value"
+              :label="opt.name || opt.value"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="获客成本等级">
+          <el-select v-model="profileEditForm.acquisitionCostLevel" clearable placeholder="请选择">
+            <el-option
+              v-for="opt in getProfileEnumOptions('acquisition_cost_level')"
+              :key="opt.value"
+              :label="opt.name || opt.value"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="流量质量">
+          <el-select v-model="profileEditForm.trafficQuality" clearable placeholder="请选择">
+            <el-option
+              v-for="opt in getProfileEnumOptions('traffic_quality')"
+              :key="opt.value"
+              :label="opt.name || opt.value"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="线索质量评分">
+          <el-input-number v-model="profileEditForm.leadQualityScore" :min="0" :max="100" />
+        </el-form-item>
+        <el-form-item label="推荐联系渠道">
+          <el-select v-model="profileEditForm.recommendedContactMethod" clearable placeholder="请选择">
+            <el-option
+              v-for="opt in getProfileEnumOptions('recommended_contact_method')"
+              :key="opt.value"
+              :label="opt.name || opt.value"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="推荐沟通语言">
+          <el-input v-model="profileEditForm.recommendedLanguage" />
+        </el-form-item>
+        <el-form-item label="跟进优先级">
+          <el-input v-model="profileEditForm.followUpPriority" />
+        </el-form-item>
+        <el-form-item label="跟进周期">
+          <el-input v-model="profileEditForm.followUpCycle" />
+        </el-form-item>
+        <el-form-item label="画像总结">
+          <el-input v-model="profileEditForm.profileSummary" type="textarea" :rows="3" />
+        </el-form-item>
+        <el-form-item label="风险备注">
+          <el-input v-model="profileEditForm.riskNotes" type="textarea" :rows="3" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="profileEditVisible = false">取消</el-button>
+        <el-button type="primary" :loading="profileSaving" @click="handleSaveProfile">保存</el-button>
+      </template>
+    </el-dialog>
   </el-dialog>
 </template>
 
@@ -122,6 +255,8 @@ import type {
   CustomerContactUpdateDTO,
   MessengerTypeEnum,
 } from '@/types/customer'
+import { getCustomerProfileDetail, updateCustomerProfile, refreshCustomerProfile, type CustomerProfileVO, type CustomerProfileUpdateDTO } from '@/api/customerProfile'
+import { getCustomerProfileColumns, type TableColumn } from '@/api/metadata'
 
 const props = defineProps<{
   modelValue: boolean
@@ -139,6 +274,14 @@ const visible = computed({
 
 const loading = ref(false)
 const detail = ref<CustomerVO | null>(null)
+
+const profileLoading = ref(false)
+const profile = ref<CustomerProfileVO | null>(null)
+const profileRefreshing = ref(false)
+const profileSaving = ref(false)
+const profileEditVisible = ref(false)
+const profileEditForm = ref<CustomerProfileUpdateDTO>({})
+const profileColumns = ref<TableColumn[]>([])
 
 const customerTypeOptions: Array<{ label: string; value: CustomerTypeEnum }> = [
   { label: '个人', value: 'INDIVIDUAL' },
@@ -192,11 +335,54 @@ const fetchDetail = async () => {
   }
 }
 
+const fetchProfileColumns = async () => {
+  try {
+    const res = await getCustomerProfileColumns()
+    profileColumns.value = (res.data || []) as TableColumn[]
+  } catch {}
+}
+
+const findProfileColumn = (field: string): TableColumn | undefined => {
+  if (!field) return undefined
+  return profileColumns.value.find(c => c.field === field && c.type === 'enum')
+}
+
+const getProfileEnumOptions = (field: string) => {
+  const col = findProfileColumn(field)
+  if (!col || !Array.isArray(col.enumOptions)) return []
+  return col.enumOptions
+}
+
+const renderProfileEnumLabel = (field: string, value?: string | null) => {
+  if (!value) return ''
+  const opts = getProfileEnumOptions(field)
+  const found = opts.find(o => o.value === value)
+  return found ? (found.name || found.value) : value
+}
+
+const fetchProfile = async (customerId: number) => {
+  profileLoading.value = true
+  try {
+    const res = await getCustomerProfileDetail(customerId)
+    if (res.code === 0) {
+      profile.value = res.data || null
+    } else {
+      ElMessage.error(res.msg || '获取客户画像失败')
+    }
+  } catch {
+    ElMessage.error('获取客户画像失败')
+  } finally {
+    profileLoading.value = false
+  }
+}
+
 watch(
   () => ({ visible: props.modelValue, id: props.customerId }),
   (val) => {
     if (val.visible && val.id) {
       fetchDetail()
+      fetchProfileColumns()
+      fetchProfile(val.id)
     }
   },
   { immediate: false }
@@ -358,5 +544,63 @@ const editContactFromDetail = () => {
   if (!contactDetail.value) return
   openEditContact(contactDetail.value)
   contactDetailDialog.visible = false
+}
+
+const openProfileEdit = () => {
+  if (!props.customerId) return
+  const current = profile.value
+  profileEditForm.value = {
+    customerValueLevel: current?.customerValueLevel || undefined,
+    cooperationIntent: current?.cooperationIntent || undefined,
+    decisionSpeed: current?.decisionSpeed || undefined,
+    priceSensitivity: current?.priceSensitivity || undefined,
+    acquisitionCostLevel: current?.acquisitionCostLevel || undefined,
+    trafficQuality: current?.trafficQuality || undefined,
+    leadQualityScore: current?.leadQualityScore ?? undefined,
+    recommendedContactMethod: current?.recommendedContactMethod || undefined,
+    recommendedLanguage: current?.recommendedLanguage || undefined,
+    followUpPriority: current?.followUpPriority || undefined,
+    followUpCycle: current?.followUpCycle || undefined,
+    profileSummary: current?.profileSummary || undefined,
+    riskNotes: current?.riskNotes || undefined,
+  }
+  profileEditVisible.value = true
+}
+
+const handleSaveProfile = async () => {
+  if (!props.customerId) return
+  profileSaving.value = true
+  try {
+    const res = await updateCustomerProfile(props.customerId, profileEditForm.value)
+    if (res.code === 0) {
+      ElMessage.success('客户画像已更新')
+      profileEditVisible.value = false
+      await fetchProfile(props.customerId)
+    } else {
+      ElMessage.error(res.msg || '更新客户画像失败')
+    }
+  } catch {
+    ElMessage.error('更新客户画像失败')
+  } finally {
+    profileSaving.value = false
+  }
+}
+
+const handleRefreshProfile = async () => {
+  if (!props.customerId) return
+  profileRefreshing.value = true
+  try {
+    const res = await refreshCustomerProfile(props.customerId)
+    if (res.code === 0) {
+      ElMessage.success('已触发该客户画像刷新')
+      await fetchProfile(props.customerId)
+    } else {
+      ElMessage.error(res.msg || '刷新客户画像失败')
+    }
+  } catch {
+    ElMessage.error('刷新客户画像失败')
+  } finally {
+    profileRefreshing.value = false
+  }
 }
 </script>

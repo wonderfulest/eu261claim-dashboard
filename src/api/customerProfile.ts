@@ -59,3 +59,11 @@ export const updateCustomerProfile = (customerId: number, data: CustomerProfileU
 export const deleteCustomerProfile = (id: number): Promise<ApiResponse<boolean>> => {
   return instance.post('/admin/customer/profile/delete', undefined, { params: { id } })
 }
+
+export const refreshAllCustomerProfiles = (): Promise<ApiResponse<boolean>> => {
+  return instance.post('/admin/customer/profile/refresh-all')
+}
+
+export const refreshCustomerProfile = (customerId: number): Promise<ApiResponse<boolean>> => {
+  return instance.post(`/admin/customer/profile/refresh/${customerId}`)
+}
