@@ -15,7 +15,8 @@ export const DESIGN_FONT_TYPE_ENUM_NAME = 'DesignFontType'
 export const DISPLAY_TYPE_ENUM_NAME = 'DisplayType'
 export const ICON_CATEGORY_ENUM_NAME = 'IconCategory'
 export const DATA_TYPE_CATEGORY_ENUM_NAME = 'DataTypeCategory'
-export const WEBSITE_BANNER_LINK_TYPE_ENUM_NAME = 'com.wukong.face.modules.website.enums.BannerLinkType'
+export const WEBSITE_BANNER_LINK_TYPE_ENUM_NAME = 'com.wukong.eu261claim.modules.website.enums.BannerLinkType'
+export const MARKETING_CAMPAIGN_STATUS_ENUM_NAME = 'com.wukong.eu261claim.modules.campaign.enums.MarketingCampaignStatus'
 
 // ===== Store =====
 export const useEnumStore = defineStore('enum', {

@@ -59,6 +59,7 @@ import type { ApiResponse, PageResponse } from '@/types/api'
 import JsonEditor from '@/components/common/JsonEditor.vue'
 import { listEnumOptions } from '@/api/common'
 import type { EnumOption } from '@/api/common'
+import { MARKETING_CAMPAIGN_STATUS_ENUM_NAME } from '@/store/common'
 
 const props = defineProps<{ visible: boolean; initial?: CampaignVO | null }>()
 const emit = defineEmits<{ (e: 'update:visible', v: boolean): void; (e: 'submit', v: CampaignUpdateDTO): void; (e: 'closed'): void }>()
@@ -74,7 +75,7 @@ const rules: FormRules = { name: [{ required: true, message: '请输入活动名
 const campaignStatusOptions = ref<Array<{ label: string; value: MarketingCampaignStatus }>>([])
 const loadCampaignStatusOptions = async () => {
   try {
-    const res = await listEnumOptions('com.wukong.face.modules.campaign.enums.MarketingCampaignStatus')
+    const res = await listEnumOptions(MARKETING_CAMPAIGN_STATUS_ENUM_NAME)
     const list: any[] = (res as any)?.data?.data || (res as any)?.data || []
     const opts: Array<{ label: string; value: MarketingCampaignStatus }> = []
     for (const it of list || []) {

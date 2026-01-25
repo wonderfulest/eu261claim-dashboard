@@ -67,6 +67,18 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/marketing/campaigns',
+      name: 'Campaigns',
+      component: () => import('@/views/marketing/Campaigns.vue'),
+      meta: { requiresAuth: true }
+    },
+     {
+      path: '/marketing/push-records',
+      name: 'CampaignPushRecords',
+      component: () => import('@/views/marketing/CampaignPushRecords.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/marketing/segments',
       name: 'Segments',
       component: () => import('@/views/marketing/Segments.vue'),

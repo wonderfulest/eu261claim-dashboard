@@ -51,7 +51,6 @@
         <template #default="{ row }">
           <el-button v-if="row.status === 'DRAFT' || row.status === 'RUNNING'" type="primary" link @click="openEdit(row)">编辑</el-button>
           <el-button v-if="row.status === 'DRAFT'" type="danger" link @click="confirmDelete(row)">删除</el-button>
-          <el-button v-if="row.status === 'DRAFT'" type="primary" link @click="openItems(row)">配置应用</el-button>
           <el-button v-if="row.status === 'DRAFT'" type="success" link @click="handleGeneratePush(row)">生成推送记录</el-button>
           <el-button v-if="row.status === 'DRAFT'" type="warning" link @click="handleDeleteDraftPush(row)">删除草稿推送记录</el-button>
           <el-button v-if="row.status === 'RUNNING'" type="warning" link @click="handleTriggerAll(row)">全部推送</el-button>
@@ -74,65 +73,6 @@
 
     <CampaignCreateDialog v-model:visible="createVisible" @submit="onCreateSubmit" />
     <CampaignEditDialog v-model:visible="editVisible" :initial="dialog.current || null" @submit="onEditSubmit" />
-
-    <!-- 活动应用配置弹窗 -->
-    <el-dialog v-model="itemsDialog.visible" :title="`活动应用配置 - #${itemsDialog.campaign?.id} ${itemsDialog.campaign?.name || ''}`" width="1200px">
-      <div style="margin-bottom: 12px; display: flex; gap: 8px;">
-        <el-button type="primary" @click="addItem">新增一行</el-button>
-        <el-button @click="reloadItems" :loading="itemsDialog.loading">刷新</el-button>
-      </div>
-      <el-table :data="itemsDialog.items" style="width: 100%" v-loading="itemsDialog.loading">
-        <el-table-column label="#" width="56">
-          <template #default="{ $index }">{{ $index + 1 }}</template>
-        </el-table-column>
-        <el-table-column label="关联应用" min-width="260">
-          <template #default="{ row }">
-            <AppSearchSelect
-              v-model="row.productId"
-              placeholder="搜索选择应用"
-              width="240px"
-              @selected="onProductSelected(row, $event)"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column label="排序" width="120">
-          <template #default="{ row }">
-            <el-input-number v-model="row.rank" :min="0" :max="9999" />
-          </template>
-        </el-table-column>
-        <el-table-column label="标题" min-width="160">
-          <template #default="{ row }">
-            <el-input v-model="row.title" placeholder="展示标题（可选）" />
-          </template>
-        </el-table-column>
-        <el-table-column label="图片URL" min-width="220">
-          <template #default="{ row }">
-            <el-input v-model="row.imageUrl" placeholder="图片链接（可选）" />
-          </template>
-        </el-table-column>
-        <el-table-column label="点击跳转" min-width="220">
-          <template #default="{ row }">
-            <el-input v-model="row.clickUrl" placeholder="跳转链接（可选）" />
-          </template>
-        </el-table-column>
-        <el-table-column label="启用" width="100" align="center">
-          <template #default="{ row }">
-            <el-switch v-model="row.isActive" :active-value="1" :inactive-value="0" />
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right">
-          <template #default="{ $index }">
-            <el-button type="danger" link @click="removeItem($index)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="itemsDialog.visible = false">取消</el-button>
-          <el-button type="primary" :loading="itemsDialog.saving" @click="saveItems">保存</el-button>
-        </span>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -141,13 +81,10 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getCampaignPage, createCampaign, updateCampaign, deleteCampaign, generatePush } from '@/api/promotion'
 import type { CampaignVO, CampaignCreateDTO, CampaignUpdateDTO, CampaignPageQuery, MarketingCampaignStatus } from '@/types/promotion'
-import type { PromotionItemDTO, PromotionItemVO } from '@/types/promotion'
-import { listCampaignItems, replaceCampaignItems } from '@/api/promotion-item'
 import { deleteCampaignPushByCampaignId, triggerCampaignPushAll } from '@/api/campaign-push'
 import { listEnumOptions } from '@/api/common'
 import type { EnumOption } from '@/api/common'
-import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
-import type { Product } from '@/types/product'
+import { MARKETING_CAMPAIGN_STATUS_ENUM_NAME } from '@/store/common'
 import CampaignCreateDialog from '@/views/marketing/components/CampaignCreateDialog.vue'
 import CampaignEditDialog from '@/views/marketing/components/CampaignEditDialog.vue'
 
@@ -168,7 +105,7 @@ const campaignStatusTextMap = ref<Record<string, string>>({})
 
 const loadCampaignStatusOptions = async () => {
   try {
-    const res = await listEnumOptions('com.wukong.face.modules.campaign.enums.MarketingCampaignStatus')
+    const res = await listEnumOptions(MARKETING_CAMPAIGN_STATUS_ENUM_NAME)
     const list: any[] = (res as any)?.data?.data || (res as any)?.data || []
     const opts: Array<{ label: string; value: MarketingCampaignStatus }> = []
     const map: Record<string, string> = {}
@@ -328,78 +265,6 @@ onMounted(async () => {
   await loadCampaignStatusOptions()
   fetchPage()
 })
-
-// 活动应用配置逻辑
-const itemsDialog = reactive<{ visible: boolean; campaign: CampaignVO | null; items: PromotionItemDTO[]; loading: boolean; saving: boolean }>({
-  visible: false,
-  campaign: null,
-  items: [],
-  loading: false,
-  saving: false
-})
-
-const openItems = async (row: CampaignVO) => {
-  itemsDialog.campaign = row
-  itemsDialog.visible = true
-  await loadItems()
-}
-
-const loadItems = async () => {
-  if (!itemsDialog.campaign) return
-  itemsDialog.loading = true
-  try {
-    const res = await listCampaignItems(itemsDialog.campaign.id as number)
-    const voList = (res.data || []) as unknown as PromotionItemVO[]
-    itemsDialog.items = voList.map(v => ({
-      productId: v.productId,
-      rank: v.rank ?? 0,
-      title: v.title || '',
-      imageUrl: v.imageUrl || '',
-      clickUrl: v.clickUrl || '',
-      isActive: v.isActive ?? 1
-    }))
-  } catch (e) {
-    ElMessage.error('加载活动应用失败')
-  } finally {
-    itemsDialog.loading = false
-  }
-}
-
-const reloadItems = () => loadItems()
-
-const addItem = () => {
-  itemsDialog.items.push({ productId: 0 as unknown as number, rank: 0, title: '', imageUrl: '', clickUrl: '', isActive: 1 })
-}
-
-const removeItem = (index: number) => {
-  itemsDialog.items.splice(index, 1)
-}
-
-const saveItems = async () => {
-  if (!itemsDialog.campaign) return
-  for (const it of itemsDialog.items) {
-    if (!it.productId || Number(it.productId) <= 0) {
-      ElMessage.error('请为每一行选择应用')
-      return
-    }
-  }
-  itemsDialog.saving = true
-  try {
-    await replaceCampaignItems(itemsDialog.campaign.id as number, itemsDialog.items)
-    ElMessage.success('保存成功')
-    itemsDialog.visible = false
-  } catch (e:any) {
-    ElMessage.error(e?.msg || '保存失败')
-  } finally {
-    itemsDialog.saving = false
-  }
-}
-
-const onProductSelected = (row: PromotionItemDTO, p: Product) => {
-  row.title = p.name
-  row.imageUrl = p.garminImageUrl
-  row.clickUrl = p.garminStoreUrl
-}
 
 const handleGeneratePush = async (row: CampaignVO) => {
   try {

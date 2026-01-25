@@ -1,5 +1,6 @@
 import instance from '@/config/axios'
 import type { ApiResponse, PageResponse } from '@/types/api'
+import type { CustomerVO } from '@/types/customer'
 
 export interface SegmentVO {
   id: number
@@ -36,6 +37,12 @@ export interface SegmentPageQueryDTO {
   status?: number
 }
 
+export interface SegmentCustomerPageQueryDTO {
+  segmentId: number
+  pageNum: number
+  pageSize: number
+}
+
 export const createSegment = (data: SegmentCreateDTO): Promise<ApiResponse<SegmentVO>> => {
   return instance.post('/admin/segment/create', data)
 }
@@ -58,6 +65,10 @@ export const listSegments = (): Promise<ApiResponse<SegmentVO[]>> => {
 
 export const pageSegments = (dto: SegmentPageQueryDTO): Promise<ApiResponse<PageResponse<SegmentVO>>> => {
   return instance.post('/admin/segment/page', dto)
+}
+
+export const pageSegmentCustomers = (dto: SegmentCustomerPageQueryDTO): Promise<ApiResponse<PageResponse<CustomerVO>>> => {
+  return instance.post('/admin/segment/customers/page', dto)
 }
 
 // 刷新所有分群

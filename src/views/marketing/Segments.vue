@@ -36,6 +36,7 @@
         <template #default="scope">
           <el-button size="small" @click="openEdit(scope.row)">编辑</el-button>
           <el-button size="small" @click="handleRefreshOne(scope.row)">刷新</el-button>
+          <el-button size="small" @click="openCustomers(scope.row)">查看客户</el-button>
           <el-button
             v-if="scope.row.status === 0"
             size="small"
@@ -76,15 +77,39 @@
       :initial="initialForEditor"
       @submit="onEditorSubmit"
     />
+
+    <el-dialog v-model="customersDialogVisible" title="分群客户列表" width="900px">
+      <el-table :data="segmentCustomers" style="width: 100%" :loading="customersLoading">
+        <el-table-column prop="id" label="客户ID" width="100" />
+        <el-table-column prop="companyName" label="公司名称" min-width="200" />
+        <el-table-column prop="country" label="国家" width="120" />
+        <el-table-column prop="city" label="城市" width="120" />
+        <el-table-column prop="status" label="状态" width="120" />
+        <el-table-column prop="createdAt" label="创建时间" width="180" />
+      </el-table>
+      <div class="pagination-bar" style="margin-top: 12px;">
+        <el-pagination
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          :current-page="customersQuery.pageNum"
+          :page-size="customersQuery.pageSize"
+          :total="customersTotal"
+          :page-sizes="[10, 20, 50, 100]"
+          @current-change="handleCustomersPageChange"
+          @size-change="handleCustomersSizeChange"
+        />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { pageSegments, createSegment, updateSegment, deleteSegment, refreshAllSegments, refreshSegment, activateSegment, deactivateSegment, type SegmentVO, type SegmentCreateDTO, type SegmentUpdateDTO } from '@/api/segment'
+import { pageSegments, createSegment, updateSegment, deleteSegment, refreshAllSegments, refreshSegment, activateSegment, deactivateSegment, pageSegmentCustomers, type SegmentVO, type SegmentCreateDTO, type SegmentUpdateDTO, type SegmentCustomerPageQueryDTO } from '@/api/segment'
 import { formatDateTime } from '@/utils/date'
 import SegmentEditorDialog from '@/views/marketing/components/SegmentEditorDialog.vue'
+import type { CustomerVO } from '@/types/customer'
 
 const loading = ref(false)
 const list = ref<SegmentVO[]>([])
@@ -106,6 +131,12 @@ const query = ref({
   status: undefined as number | undefined,
   orderBy: 'id desc' as string | undefined,
 })
+
+const customersDialogVisible = ref(false)
+const customersLoading = ref(false)
+const segmentCustomers = ref<CustomerVO[]>([])
+const customersTotal = ref(0)
+const customersQuery = ref<SegmentCustomerPageQueryDTO>({ segmentId: 0, pageNum: 1, pageSize: 10 })
 
 // moved to SegmentEditorDialog
 
@@ -129,6 +160,40 @@ const fetchPage = async () => {
 const handleSearch = () => {
   query.value.pageNum = 1
   fetchPage()
+}
+
+const fetchSegmentCustomers = async () => {
+  customersLoading.value = true
+  try {
+    const res = await pageSegmentCustomers(customersQuery.value)
+    if (res.code === 0 && res.data) {
+      segmentCustomers.value = res.data.list
+      customersTotal.value = res.data.total
+    } else {
+      ElMessage.error(res.msg || '获取分群客户列表失败')
+    }
+  } catch (e) {
+    ElMessage.error('获取分群客户列表失败')
+  } finally {
+    customersLoading.value = false
+  }
+}
+
+const openCustomers = (row: SegmentVO) => {
+  customersQuery.value = { segmentId: row.id, pageNum: 1, pageSize: customersQuery.value.pageSize }
+  customersDialogVisible.value = true
+  fetchSegmentCustomers()
+}
+
+const handleCustomersPageChange = (page: number) => {
+  customersQuery.value.pageNum = page
+  fetchSegmentCustomers()
+}
+
+const handleCustomersSizeChange = (size: number) => {
+  customersQuery.value.pageSize = size
+  customersQuery.value.pageNum = 1
+  fetchSegmentCustomers()
 }
 
 const handleReset = () => {
