@@ -17,6 +17,9 @@ export const ICON_CATEGORY_ENUM_NAME = 'IconCategory'
 export const DATA_TYPE_CATEGORY_ENUM_NAME = 'DataTypeCategory'
 export const WEBSITE_BANNER_LINK_TYPE_ENUM_NAME = 'com.wukong.eu261claim.modules.website.enums.BannerLinkType'
 export const MARKETING_CAMPAIGN_STATUS_ENUM_NAME = 'com.wukong.eu261claim.modules.campaign.enums.MarketingCampaignStatus'
+export const GA_SHORT_LINK_STATUS_ENUM_NAME = 'com.wukong.eu261claim.modules.growth.ga.enums.ShortLinkStatus'
+export const GA_SHORT_LINK_CHANNEL_ENUM_NAME = 'com.wukong.eu261claim.modules.growth.ga.enums.ShortLinkChannel'
+export const GA_SHORT_LINK_PLATFORM_ENUM_NAME = 'com.wukong.eu261claim.modules.growth.ga.enums.ShortLinkPlatform'
 
 // ===== Store =====
 export const useEnumStore = defineStore('enum', {

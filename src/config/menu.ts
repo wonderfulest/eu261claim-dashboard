@@ -23,6 +23,16 @@ export const topMenus: TopMenuGroup[] = [
     ],
   },
   {
+    key: 'ga',
+    title: 'GA 增长分析',
+    basePaths: ['/ga'],
+    children: [
+      { key: 'ga-short-links', title: '短链配置', path: '/ga/short-links' },
+      // 预留：数据归因分析等页面
+      // { key: 'ga-attribution', title: '数据归因分析', path: '/ga/attribution' },
+    ],
+  },
+  {
     key: 'marketing',
     title: '营销工具',
     basePaths: ['/marketing'],

@@ -37,6 +37,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/ga/short-links',
+      name: 'GaShortLinks',
+      component: () => import('@/views/ga/GaShortLinks.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/email-records',
       name: 'EmailRecords',
       component: () => import('@/views/dashboard/EmailRecords.vue'),
