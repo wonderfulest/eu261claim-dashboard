@@ -16,12 +16,15 @@ export const topMenus: TopMenuGroup[] = [
   {
     key: 'official',
     title: '官网运营',
-    basePaths: ['/dashboard', '/email-records'],
+    basePaths: ['/dashboard', '/email-records', '/flight-query-records', '/flight-history', '/airports'],
     children: [
       { key: 'dashboard', title: '仪表盘', path: '/dashboard' },
-      { key: 'email-records', title: '邮件发送历史', path: '/email-records' },
+      { key: 'airports', title: '机场信息', path: '/airports' },
+      { key: 'flight-query-records', title: '网站搜索历史', path: '/flight-query-records' },
+      { key: 'flight-history', title: '航班历史查询', path: '/flight-history' },
     ],
   },
+
   {
     key: 'ga',
     title: 'GA 增长分析',
@@ -43,6 +46,7 @@ export const topMenus: TopMenuGroup[] = [
       { key: 'email-templates', title: '邮件模板', path: '/marketing/email-templates' },
       { key: 'promotion-campaigns', title: '营销活动', path: '/marketing/campaigns' },
       { key: 'push-records', title: '推送记录', path: '/marketing/push-records' },
+      { key: 'email-records', title: '邮件发送历史', path: '/email-records' },
     ],
   },
   {

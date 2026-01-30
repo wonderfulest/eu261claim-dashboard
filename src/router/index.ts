@@ -49,6 +49,24 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/flight-query-records',
+      name: 'FlightQueryRecords',
+      component: () => import('@/views/dashboard/FlightQueryRecords.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/flight-history',
+      name: 'FlightHistory',
+      component: () => import('@/views/dashboard/FlightHistory.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/airports',
+      name: 'Airports',
+      component: () => import('@/views/dashboard/Airports.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/users/user-management',
       name: 'UserManagement',
       component: () => import('@/views/UserManagement.vue'),
