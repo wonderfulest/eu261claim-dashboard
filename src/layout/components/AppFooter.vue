@@ -3,7 +3,7 @@
     <div class="footer-inner">
       <div class="footer-left">
         <span class="footer-icon">🐦</span>
-        <span>© Growth 2026</span>
+        <span>© eu261claim 2026</span>
       </div>
       <div class="footer-links">
         <a href="#">Terms of Use</a>
@@ -11,7 +11,7 @@
         <a href="mailto:support@eu261claim.com">support@eu261claim.com</a>
       </div>
       <div class="footer-right">
-        <span>Growth</span>
+        <span>eu261claim</span>
       </div>
     </div>
   </footer>

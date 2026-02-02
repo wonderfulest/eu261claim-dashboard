@@ -24,7 +24,7 @@ export const useUserStore = defineStore('user', {
     }
   },
   persist: {
-    key: 'growth-user',
+    key: 'eu261claim-user',
     storage: localStorage
   }
 }) 

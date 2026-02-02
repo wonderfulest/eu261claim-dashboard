@@ -56,7 +56,7 @@ export const useEnumStore = defineStore('enum', {
     }
   },
   persist: {
-    key: 'growth-enums',
+    key: 'eu261claim-enums',
     storage: sessionStorage,
     pick: ['options', 'loaded']
   }

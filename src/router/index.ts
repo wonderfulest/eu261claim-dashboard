@@ -43,6 +43,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/ga/click-events',
+      name: 'GaClickEvents',
+      component: () => import('@/views/ga/GaClickEvents.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/email-records',
       name: 'EmailRecords',
       component: () => import('@/views/dashboard/EmailRecords.vue'),

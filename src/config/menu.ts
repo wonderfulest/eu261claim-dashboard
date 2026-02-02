@@ -31,6 +31,7 @@ export const topMenus: TopMenuGroup[] = [
     basePaths: ['/ga'],
     children: [
       { key: 'ga-short-links', title: '短链配置', path: '/ga/short-links' },
+      { key: 'ga-click-events', title: '点击事件', path: '/ga/click-events' },
       // 预留：数据归因分析等页面
       // { key: 'ga-attribution', title: '数据归因分析', path: '/ga/attribution' },
     ],
