@@ -73,6 +73,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/airlines',
+      name: 'Airlines',
+      component: () => import('@/views/dashboard/Airlines.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/users/user-management',
       name: 'UserManagement',
       component: () => import('@/views/UserManagement.vue'),

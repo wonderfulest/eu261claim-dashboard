@@ -2,8 +2,8 @@
   <header class="header">
     <div class="header-inner">
       <div class="logo">
-        <span class="logo-icon">G</span>
-        <span class="logo-text">rowth</span>
+        <span class="logo-icon">Eu</span>
+        <span class="logo-text">261Claim</span>
       </div>
       <nav class="nav-list">
         <router-link
