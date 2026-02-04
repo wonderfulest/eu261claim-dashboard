@@ -10,16 +10,11 @@
     <div class="filters">
       <el-input
         v-model="query.companyNameLike"
-        placeholder="按公司名称搜索"
+        placeholder="按客户名称搜索"
         clearable
         style="width: 220px; margin-right: 12px;"
       />
-      <el-input
-        v-model="query.country"
-        placeholder="按国家搜索"
-        clearable
-        style="width: 180px; margin-right: 12px;"
-      />
+      <CountrySelect v-model="query.country" />
       <el-select
         v-model="query.customerType"
         placeholder="客户类型"
@@ -52,8 +47,12 @@
 
     <el-table :data="list" style="width: 100%" :loading="loading">
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="companyName" label="公司名称" min-width="200" />
-      <el-table-column prop="country" label="国家" width="120" />
+      <el-table-column prop="companyName" label="客户名称" min-width="200" />
+      <el-table-column prop="country" label="国家/地区" width="200">
+        <template #default="{ row }">
+          <CountryDisplay :code="row.country" />
+        </template>
+      </el-table-column>
       <el-table-column prop="city" label="城市" width="120" />
       <el-table-column prop="customerType" label="类型" width="120">
         <template #default="{ row }">
@@ -100,6 +99,10 @@
 
     <el-dialog v-model="formDialog.visible" :title="formDialog.isEdit ? '编辑客户' : '新建客户'" width="720">
       <el-form :model="form" label-width="100px">
+       
+        <el-form-item label="客户名称" required>
+          <el-input v-model="form.companyName" />
+        </el-form-item>
         <el-form-item label="客户类型">
           <el-select v-model="form.customerType" placeholder="选择类型" clearable>
             <el-option
@@ -110,16 +113,10 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="公司名称" required>
-          <el-input v-model="form.companyName" />
-        </el-form-item>
-        <el-form-item label="公司类型">
-          <el-input v-model="form.companyType" />
-        </el-form-item>
         <el-form-item label="国家 / 城市">
           <div style="display:flex; gap:8px; width:100%;">
-            <el-input v-model="form.country" placeholder="国家" />
-            <el-input v-model="form.city" placeholder="城市" />
+            <CountrySelect v-model="form.country" placeholder="选择国家" />
+            <el-input v-model="form.city" placeholder="城市" style="flex: 1;" />
           </div>
         </el-form-item>
         <el-form-item label="来源渠道">
@@ -159,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { formatDateTime } from '@/utils/date'
 import CustomerDetailDialog from './customer/CustomerDetailDialog.vue'
@@ -177,6 +174,9 @@ import type {
   CustomerTypeEnum,
   CustomerStatusEnum,
 } from '@/types/customer'
+import CountrySelect from '@/components/common/CountrySelect.vue'
+import CountryDisplay from '@/components/common/CountryDisplay.vue'
+import { useEnumStore, CUSTOMER_TYPE_ENUM_NAME } from '@/store/common'
 
 const loading = ref(false)
 const list = ref<CustomerVO[]>([])
@@ -195,10 +195,15 @@ const query = reactive<CustomerQueryDTO>({
   status: undefined,
 })
 
-const customerTypeOptions: Array<{ label: string; value: CustomerTypeEnum }> = [
-  { label: '个人', value: 'INDIVIDUAL' },
-  { label: '代理/机构', value: 'AGENCY' },
-]
+const enumStore = useEnumStore()
+
+const customerTypeOptions = computed<Array<{ label: string; value: CustomerTypeEnum }>>(() => {
+  const opts = enumStore.getOptions(CUSTOMER_TYPE_ENUM_NAME) || []
+  return opts.map((it) => ({
+    label: (it as any).label || it.description || it.name || it.value,
+    value: it.value as CustomerTypeEnum,
+  }))
+})
 
 const statusOptions: Array<{ label: string; value: CustomerStatusEnum }> = [
   { label: '线索', value: 'LEAD' },
@@ -209,7 +214,7 @@ const statusOptions: Array<{ label: string; value: CustomerStatusEnum }> = [
 
 const customerTypeText = (v?: CustomerTypeEnum) => {
   if (!v) return '-'
-  const found = customerTypeOptions.find((it) => it.value === v)
+  const found = customerTypeOptions.value.find((it) => it.value === v)
   return found?.label || v
 }
 
@@ -332,7 +337,7 @@ const openEdit = (row: CustomerVO) => {
 
 const doSave = async () => {
   if (!form.value.companyName || !form.value.companyName.trim()) {
-    ElMessage.error('请填写公司名称')
+    ElMessage.error('请填写客户名称')
     return
   }
 
@@ -389,7 +394,10 @@ const openDetail = (row: CustomerVO) => {
   detailVisible.value = true
 }
 
-onMounted(fetchPage)
+onMounted(() => {
+  enumStore.ensureOptions(CUSTOMER_TYPE_ENUM_NAME)
+  fetchPage()
+})
 </script>
 
 <style scoped>

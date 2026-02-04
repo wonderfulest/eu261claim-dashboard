@@ -20,6 +20,7 @@ export const MARKETING_CAMPAIGN_STATUS_ENUM_NAME = 'com.wukong.eu261claim.module
 export const GA_SHORT_LINK_STATUS_ENUM_NAME = 'com.wukong.eu261claim.modules.growth.ga.enums.ShortLinkStatus'
 export const GA_SHORT_LINK_CHANNEL_ENUM_NAME = 'com.wukong.eu261claim.modules.growth.ga.enums.ShortLinkChannel'
 export const GA_SHORT_LINK_PLATFORM_ENUM_NAME = 'com.wukong.eu261claim.modules.growth.ga.enums.ShortLinkPlatform'
+export const CUSTOMER_TYPE_ENUM_NAME = 'com.wukong.eu261claim.modules.customer.enums.CustomerTypeEnum'
 
 // ===== Store =====
 export const useEnumStore = defineStore('enum', {

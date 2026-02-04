@@ -10,13 +10,7 @@
         style="width: 160px; margin-right: 8px;"
         @keyup.enter.native="handleSearch"
       />
-      <el-input
-        v-model="query.countryCode"
-        placeholder="国家/地区代码 (ISO-2)"
-        clearable
-        style="width: 180px; margin-right: 8px;"
-        @keyup.enter.native="handleSearch"
-      />
+      <CountrySelect v-model="query.countryCode" />
       <el-select
         v-model="query.eu261Eligible"
         placeholder="EU261 适用"
@@ -47,7 +41,11 @@
       <el-table-column prop="name" label="名称" min-width="180" />
       <el-table-column prop="chineseName" label="中文名称" min-width="160" />
       <el-table-column prop="type" label="类型" width="120" />
-      <el-table-column prop="countryCode" label="国家/地区" width="120" />
+      <el-table-column prop="countryCode" label="国家/地区" width="200">
+        <template #default="{ row }">
+          <CountryDisplay :code="row.countryCode" />
+        </template>
+      </el-table-column>
       <el-table-column prop="eu261Eligible" label="EU261" width="140">
         <template #default="{ row }">
           <el-switch
@@ -109,8 +107,8 @@
         <el-form-item label="类型">
           <el-input v-model="form.type" maxlength="50" />
         </el-form-item>
-        <el-form-item label="国家/地区代码">
-          <el-input v-model="form.countryCode" maxlength="10" />
+        <el-form-item label="国家/地区">
+          <CountrySelect v-model="form.countryCode" />
         </el-form-item>
         <el-form-item label="名称">
           <el-input v-model="form.name" maxlength="100" />
@@ -152,6 +150,8 @@
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { pageAirlines, getAirline, saveAirline, updateAirlineEu261, type AirlineVO, type AirlinePageRequest, type AirlineUpdateDTO } from '@/api/airlines'
+import CountrySelect from '@/components/common/CountrySelect.vue'
+import CountryDisplay from '@/components/common/CountryDisplay.vue'
 
 const loading = ref(false)
 const list = ref<AirlineVO[]>([])
@@ -205,7 +205,6 @@ const fetchPage = async () => {
     loading.value = false
   }
 }
-
 const handleSearch = () => {
   pageNum.value = 1
   fetchPage()
@@ -321,7 +320,6 @@ const handleToggleEu261 = async (row: AirlineVO, val: boolean) => {
     ElMessage.error('更新 EU261 适用状态失败')
   }
 }
-
 onMounted(() => {
   fetchPage()
 })

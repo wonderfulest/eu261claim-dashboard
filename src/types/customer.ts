@@ -1,4 +1,4 @@
-export type CustomerTypeEnum = 'INDIVIDUAL' | 'AGENCY'
+export type CustomerTypeEnum = 'INDIVIDUAL' | 'COMPANY' | 'TRAVEL_AGENT' | 'OTHER'
 
 export type CustomerStatusEnum = 'LEAD' | 'CONTACTED' | 'ACTIVE' | 'INACTIVE'
 

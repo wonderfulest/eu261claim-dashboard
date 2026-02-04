@@ -49,7 +49,11 @@
       <el-table-column prop="userId" label="用户ID" width="110" />
       <el-table-column prop="sessionId" label="Session" min-width="200" />
       <el-table-column prop="ipAddress" label="IP" width="140" />
-      <el-table-column prop="countryCode" label="国家" width="90" />
+      <el-table-column prop="countryCode" label="国家/地区" width="200">
+        <template #default="{ row }">
+          <CountryDisplay :code="row.countryCode" />
+        </template>
+      </el-table-column>
       <el-table-column prop="delayMinutes" label="延误(分钟)" width="110" />
       <el-table-column label="可赔" width="80">
         <template #default="{ row }">
@@ -85,6 +89,7 @@
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { pageFlightQueryRecords, type FlightQueryRecord } from '@/api/flightQueryRecord'
+import CountryDisplay from '@/components/common/CountryDisplay.vue'
 import { formatDateTime } from '@/utils/date'
 
 const loading = ref(false)

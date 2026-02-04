@@ -4,6 +4,7 @@ import type { ApiResponse, PageResponse } from '@/types/api'
 export interface CustomerProfileVO {
   id: number
   customerId: number
+  countryCode?: string | null
   customerValueLevel?: string | null
   cooperationIntent?: string | null
   decisionSpeed?: string | null
@@ -22,6 +23,7 @@ export interface CustomerProfileVO {
 }
 
 export interface CustomerProfileUpdateDTO {
+  countryCode?: string | null
   customerValueLevel?: string | null
   cooperationIntent?: string | null
   decisionSpeed?: string | null

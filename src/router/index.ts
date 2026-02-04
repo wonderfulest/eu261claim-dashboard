@@ -79,6 +79,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/countries',
+      name: 'Countries',
+      component: () => import('@/views/dashboard/Countries.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/users/user-management',
       name: 'UserManagement',
       component: () => import('@/views/UserManagement.vue'),

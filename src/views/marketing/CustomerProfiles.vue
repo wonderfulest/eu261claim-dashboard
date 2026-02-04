@@ -22,6 +22,11 @@
     <el-table :data="list" style="width: 100%" :loading="loading" :default-sort="defaultSort" @sort-change="handleSortChange">
       <el-table-column prop="id" label="ID" width="80" sortable="custom" />
       <el-table-column prop="customerId" label="客户ID" width="120" sortable="custom" />
+      <el-table-column prop="countryCode" label="国家/地区" min-width="160">
+        <template #default="{ row }">
+          <CountryDisplay :code="row.countryCode" />
+        </template>
+      </el-table-column>
       <el-table-column prop="customerValueLevel" label="客户价值等级" min-width="150">
         <template #default="{ row }">
           {{ renderEnumLabel('customer_value_level', row.customerValueLevel) }}
@@ -64,7 +69,7 @@
       <el-table-column prop="updatedAt" label="更新时间" min-width="180" sortable="custom">
         <template #default="{ row }">{{ row.updatedAt }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="180">
+      <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
           <el-button size="small" @click="openEdit(row)">编辑</el-button>
           <el-popconfirm title="确定删除该客户画像吗？" @confirm="doDelete(row)">
@@ -91,6 +96,9 @@
 
     <el-dialog v-model="editVisible" width="800px" title="编辑客户画像">
       <el-form :model="editForm" label-width="150px">
+        <el-form-item label="国家/地区">
+          <CountrySelect v-model="editForm.countryCode" />
+        </el-form-item>
         <el-form-item label="客户价值等级">
           <el-select v-model="editForm.customerValueLevel" clearable placeholder="请选择">
             <el-option
@@ -193,6 +201,8 @@ import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { pageCustomerProfiles, updateCustomerProfile, deleteCustomerProfile, refreshAllCustomerProfiles, type CustomerProfileVO, type CustomerProfileUpdateDTO } from '@/api/customerProfile'
 import { getCustomerProfileColumns, type TableColumn } from '@/api/metadata'
+import CountrySelect from '@/components/common/CountrySelect.vue'
+import CountryDisplay from '@/components/common/CountryDisplay.vue'
 
 const loading = ref(false)
 const list = ref<CustomerProfileVO[]>([])
@@ -295,6 +305,7 @@ const editForm = ref<CustomerProfileUpdateDTO>({})
 const openEdit = (row: CustomerProfileVO) => {
   currentRow.value = row
   editForm.value = {
+    countryCode: row.countryCode || undefined,
     customerValueLevel: row.customerValueLevel || undefined,
     cooperationIntent: row.cooperationIntent || undefined,
     decisionSpeed: row.decisionSpeed || undefined,

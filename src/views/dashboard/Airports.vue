@@ -6,7 +6,7 @@
       <el-tab-pane label="基础信息" name="basic">
         <div class="filters">
           <el-input v-model="basicQuery.iataCode" placeholder="IATA 代码" clearable style="width: 140px; margin-right: 8px;" />
-          <el-input v-model="basicQuery.countryCode" placeholder="国家代码" clearable style="width: 140px; margin-right: 8px;" />
+          <CountrySelect v-model="basicQuery.countryCode" />
           <el-input v-model="basicQuery.cityName" placeholder="城市名称" clearable style="width: 160px; margin-right: 8px;" />
           <el-select v-model="basicQuery.status" placeholder="状态" clearable style="width: 140px; margin-right: 8px;">
             <el-option :value="1" label="启用" />
@@ -21,8 +21,11 @@
           <el-table-column prop="icaoCode" label="ICAO" width="110" />
           <el-table-column prop="airportName" label="机场名(EN)" min-width="180" />
           <el-table-column prop="airportNameCn" label="机场名(中文)" min-width="180" />
-          <el-table-column prop="countryCode" label="国家" width="100" />
-          <el-table-column prop="countryName" label="国家名称" min-width="140" />
+          <el-table-column prop="countryCode" label="国家" width="200">
+            <template #default="{ row }">
+              <CountryDisplay :code="row.countryCode" />
+            </template>
+          </el-table-column>
           <el-table-column prop="cityName" label="城市" min-width="140" />
           <el-table-column prop="timezone" label="时区" width="120" />
           <el-table-column prop="airportType" label="类型" width="100" />
@@ -168,8 +171,8 @@
         <el-form-item label="机场名(中文)">
           <el-input v-model="basicForm.airportNameCn" />
         </el-form-item>
-        <el-form-item label="国家代码">
-          <el-input v-model="basicForm.countryCode" />
+        <el-form-item label="国家">
+          <CountrySelect v-model="basicForm.countryCode" />
         </el-form-item>
         <el-form-item label="国家名称">
           <el-input v-model="basicForm.countryName" />
@@ -249,6 +252,8 @@ import {
   getAirportBasic,
   getAirportConfig
 } from '@/api/airports'
+import CountryDisplay from '@/components/common/CountryDisplay.vue'
+import CountrySelect from '@/components/common/CountrySelect.vue'
 
 const activeTab = ref<'basic' | 'config'>('basic')
 

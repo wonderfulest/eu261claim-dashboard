@@ -8,6 +8,7 @@
         :detail="detail"
         :customer-type-text="customerTypeText"
         :status-text="statusText"
+        :company-type-text="companyTypeText"
       />
 
       <div style="margin-top: 24px;">
@@ -33,6 +34,9 @@
           <div v-if="profileLoading" style="text-align:center; padding:12px;">加载中...</div>
           <div v-else-if="profile">
             <el-descriptions :column="2" border>
+              <el-descriptions-item label="国家/地区">
+                <CountryDisplay :code="profile.countryCode || detail?.country" />
+              </el-descriptions-item>
               <el-descriptions-item label="客户价值等级">{{ renderProfileEnumLabel('customer_value_level', profile.customerValueLevel) || '-' }}</el-descriptions-item>
               <el-descriptions-item label="合作意向">{{ renderProfileEnumLabel('cooperation_intent', profile.cooperationIntent) || '-' }}</el-descriptions-item>
               <el-descriptions-item label="决策速度">{{ renderProfileEnumLabel('decision_speed', profile.decisionSpeed) || '-' }}</el-descriptions-item>
@@ -137,6 +141,9 @@
       append-to-body
     >
       <el-form :model="profileEditForm" label-width="150px">
+        <el-form-item label="国家/地区">
+          <CountrySelect v-model="profileEditForm.countryCode" />
+        </el-form-item>
         <el-form-item label="客户价值等级">
           <el-select v-model="profileEditForm.customerValueLevel" clearable placeholder="请选择">
             <el-option
@@ -239,6 +246,8 @@ import { computed, ref, reactive, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import CustomerBaseInfo from './CustomerBaseInfo.vue'
 import CustomerContacts from './CustomerContacts.vue'
+import CountrySelect from '@/components/common/CountrySelect.vue'
+import CountryDisplay from '@/components/common/CountryDisplay.vue'
 import {
   getCustomerDetail,
   getCustomerContactDetail,
@@ -257,6 +266,7 @@ import type {
 } from '@/types/customer'
 import { getCustomerProfileDetail, updateCustomerProfile, refreshCustomerProfile, type CustomerProfileVO, type CustomerProfileUpdateDTO } from '@/api/customerProfile'
 import { getCustomerProfileColumns, type TableColumn } from '@/api/metadata'
+import { useEnumStore, CUSTOMER_TYPE_ENUM_NAME } from '@/store/common'
 
 const props = defineProps<{
   modelValue: boolean
@@ -283,10 +293,15 @@ const profileEditVisible = ref(false)
 const profileEditForm = ref<CustomerProfileUpdateDTO>({})
 const profileColumns = ref<TableColumn[]>([])
 
-const customerTypeOptions: Array<{ label: string; value: CustomerTypeEnum }> = [
-  { label: '个人', value: 'INDIVIDUAL' },
-  { label: '代理/机构', value: 'AGENCY' },
-]
+const enumStore = useEnumStore()
+
+const customerTypeOptions = computed<Array<{ label: string; value: CustomerTypeEnum }>>(() => {
+  const opts = enumStore.getOptions(CUSTOMER_TYPE_ENUM_NAME) || []
+  return opts.map((it) => ({
+    label: (it as any).label || it.description || it.name || it.value,
+    value: it.value as CustomerTypeEnum,
+  }))
+})
 
 const statusOptions: Array<{ label: string; value: CustomerStatusEnum }> = [
   { label: '线索', value: 'LEAD' },
@@ -302,7 +317,20 @@ const messengerTypeOptions: Array<{ label: string; value: MessengerTypeEnum }> =
 
 const customerTypeText = (v?: CustomerTypeEnum) => {
   if (!v) return '-'
-  const found = customerTypeOptions.find((it) => it.value === v)
+  const found = customerTypeOptions.value.find((it) => it.value === v)
+  return found?.label || v
+}
+
+const companyTypeOptions: Array<{ label: string; value: string }> = [
+  { label: '品牌方', value: '品牌方' },
+  { label: '代理/中介', value: '代理/中介' },
+  { label: '电商品牌/卖家', value: '电商品牌/卖家' },
+  { label: '其他', value: '其他' },
+]
+
+const companyTypeText = (v?: string | null) => {
+  if (!v) return '-'
+  const found = companyTypeOptions.find((it) => it.value === v)
   return found?.label || v
 }
 
@@ -380,6 +408,7 @@ watch(
   () => ({ visible: props.modelValue, id: props.customerId }),
   (val) => {
     if (val.visible && val.id) {
+      enumStore.ensureOptions(CUSTOMER_TYPE_ENUM_NAME)
       fetchDetail()
       fetchProfileColumns()
       fetchProfile(val.id)
@@ -550,6 +579,7 @@ const openProfileEdit = () => {
   if (!props.customerId) return
   const current = profile.value
   profileEditForm.value = {
+    countryCode: current?.countryCode || undefined,
     customerValueLevel: current?.customerValueLevel || undefined,
     cooperationIntent: current?.cooperationIntent || undefined,
     decisionSpeed: current?.decisionSpeed || undefined,

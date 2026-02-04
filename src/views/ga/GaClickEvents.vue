@@ -14,9 +14,9 @@
       />
       <el-input
         v-model="filters.country"
-        placeholder="国家 (country)"
+        placeholder="国家/地区 (alpha-2 或名称，如 CN / China)"
         clearable
-        style="width: 160px; margin-right: 12px;"
+        style="width: 220px; margin-right: 12px;"
         @keyup.enter.native="handleSearch"
       />
       <el-select
@@ -66,7 +66,11 @@
       <el-table-column prop="deviceType" label="设备" width="110" />
       <el-table-column prop="os" label="OS" width="120" />
       <el-table-column prop="browser" label="浏览器" width="140" />
-      <el-table-column prop="country" label="国家" width="100" />
+      <el-table-column prop="country" label="国家/地区" width="200">
+        <template #default="{ row }">
+          <CountryDisplay :code="row.country" />
+        </template>
+      </el-table-column>
       <el-table-column prop="city" label="城市" width="120" />
       <el-table-column label="UTM" min-width="220">
         <template #default="{ row }">
@@ -114,7 +118,10 @@
           <el-descriptions-item label="OS">{{ detail.data.os }}</el-descriptions-item>
           <el-descriptions-item label="浏览器">{{ detail.data.browser }}</el-descriptions-item>
           <el-descriptions-item label="IP">{{ detail.data.ip }}</el-descriptions-item>
-          <el-descriptions-item label="国家/地区">{{ detail.data.country }} {{ detail.data.region }}</el-descriptions-item>
+          <el-descriptions-item label="国家/地区">
+            <CountryDisplay :code="detail.data.country" />
+            <span v-if="detail.data.region">（{{ detail.data.region }}）</span>
+          </el-descriptions-item>
           <el-descriptions-item label="城市">{{ detail.data.city }}</el-descriptions-item>
           <el-descriptions-item label="Referer" :span="2">{{ detail.data.referer }}</el-descriptions-item>
           <el-descriptions-item label="User-Agent" :span="2">{{ detail.data.userAgent }}</el-descriptions-item>
@@ -147,6 +154,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { pageGaClickEvents, getGaClickEventDetail, type GaClickEventVO } from '@/api/gaClickEvent'
+import CountryDisplay from '@/components/common/CountryDisplay.vue'
 import { formatDateTime } from '@/utils/date'
 
 const loading = ref(false)

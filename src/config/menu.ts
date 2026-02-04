@@ -16,11 +16,12 @@ export const topMenus: TopMenuGroup[] = [
   {
     key: 'official',
     title: '官网运营',
-    basePaths: ['/dashboard', '/email-records', '/flight-query-records', '/flight-history', '/airports', '/airlines'],
+    basePaths: ['/dashboard', '/email-records', '/flight-query-records', '/flight-history', '/airports', '/airlines', '/countries'],
     children: [
       { key: 'dashboard', title: '仪表盘', path: '/dashboard' },
       { key: 'airlines', title: '航司', path: '/airlines' },
       { key: 'airports', title: '机场', path: '/airports' },
+      { key: 'countries', title: '国家码', path: '/countries' },
       { key: 'flight-query-records', title: '网站搜索历史', path: '/flight-query-records' },
       { key: 'flight-history', title: '航班历史查询', path: '/flight-history' },
     ],
